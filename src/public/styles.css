@@ -1,0 +1,79 @@
+body {
+    text-align: center;
+    font-family: 'Genos', sans-serif;
+}
+
+a {
+    display: block;
+    width: 10em;
+    height: 2em;
+    line-height: 2em;
+    font-size: 3em;
+    text-decoration: none;
+    background-color: green;
+    color: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 10px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: auto;
+    margin-right: auto;
+    left: auto;
+}
+
+h1 {
+    font-size: 5em;
+    margin: 0;
+}
+
+h2 {
+    font-size: 2.5em;
+    margin: 0;
+}
+
+button, .submit {
+    padding: 15px 25px;
+    font-size: 2em;
+    font-family: 'Genos', sans-serif;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+    color: #fff;
+    background-color: green;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
+  }
+  
+button:hover, .submit:hover {
+    background-color: rgb(0, 100, 0);
+}
+  
+button:active, .submit:active {
+    background-color: rgb(0, 100, 0);
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+
+.formInput {
+    font-size: 2em;
+    font-family: 'Genos', sans-serif;
+    margin: 0.5em;
+}
+
+.formLabel {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 1em;
+}
+
+#warningText {
+    font-size: 3em;
+    font-family: 'Genos', sans-serif;
+    color: red;
+    margin: 0;
+}
+
+.invisible {
+    display: none;
+}

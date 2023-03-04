@@ -23,6 +23,11 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
+// instructions page
+app.get('/instructions', (req, res) => {
+    res.render('instructions');
+});
+
 // game page
 app.get('/game', (req, res) => {
     res.render('game');

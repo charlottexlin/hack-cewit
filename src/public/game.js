@@ -18,8 +18,10 @@ function main() {
 
     // add submit button
     const submitBtn = document.createElement('input');
+    submitBtn.classList.add("submit");
     submitBtn.setAttribute("type", "submit");
     submitBtn.setAttribute("value", "Submit");
+    submitBtn.addEventListener('click', startGame);
 
     playersForm.appendChild(submitBtn);
 }
@@ -29,7 +31,7 @@ function addPlayerToForm(event) {
     if (numPlayers > 9) {
         numPlayers = 10;
         const warningText = document.querySelector('#warningText');
-        warningText.textContent = "TOO MANY PLAYERS";
+        warningText.textContent = "Maximum is ten players!";
     } else {
         createFormLine();
     }
@@ -41,21 +43,25 @@ function createFormLine() {
 
     const nameLabel = document.createElement('label');
     nameLabel.setAttribute("for", "name");
+    nameLabel.classList.add("formLabel");
     nameLabel.textContent = "Name";
 
     const nameInput = document.createElement("input");
     nameInput.setAttribute("type", "text");
     nameInput.setAttribute("name", "name");
     nameInput.setAttribute("placeholder", "Player name");
+    nameInput.classList.add("formInput");
 
     const phoneLabel = document.createElement('label');
     phoneLabel.setAttribute("for", "phone-number");
+    phoneLabel.classList.add("formLabel");
     phoneLabel.textContent = "Phone number";
 
     const phoneInput = document.createElement("input");
     phoneInput.setAttribute("type", "tel");
     phoneInput.setAttribute("name", "phone-number");
     phoneInput.setAttribute("placeholder", "123-456-7890");
+    phoneInput.classList.add("formInput");
 
     const form = document.createElement('div');
     form.appendChild(nameLabel);
@@ -64,6 +70,14 @@ function createFormLine() {
     form.appendChild(phoneInput);
 
     document.querySelector('#formLines').appendChild(form);
+}
+
+function startGame(event) {
+    // prevent submit button from POSTing
+    event.preventDefault();
+    // Make the start form invisible
+    const startForm = document.querySelector('#startForm');
+    startForm.classList.toggle('invisible');
 }
 
 document.addEventListener('DOMContentLoaded', main);
