@@ -23,9 +23,9 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-// start game page
-app.get('/start', (req, res) => {
-    res.render('start');
+// game page
+app.get('/game', (req, res) => {
+    res.render('game');
 });
 
 // ---------- START APP ----------

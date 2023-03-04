@@ -1,18 +1,22 @@
 let numPlayers = 0;
 
 function main() {
+    // create form for the create game page
     const playersForm = document.querySelector('#playersForm');
     const formLines = document.createElement('div');
     formLines.setAttribute('id', "formLines");
     playersForm.appendChild(formLines);
 
-    for (let i=0; i < 5; i++) {
+    // minimum number of players is 
+    for (let i=0; i < 4; i++) {
         createFormLine();
     }
 
+    // add player button
     const addPlayerBtn = document.querySelector('#addPlayerBtn');
     addPlayerBtn.addEventListener('click', addPlayerToForm);
 
+    // add submit button
     const submitBtn = document.createElement('input');
     submitBtn.setAttribute("type", "submit");
     submitBtn.setAttribute("value", "Submit");
@@ -21,7 +25,7 @@ function main() {
 }
 
 function addPlayerToForm(event) {
-    console.log(numPlayers);
+    // maximum number of players is 10
     if (numPlayers > 9) {
         numPlayers = 10;
         const warningText = document.querySelector('#warningText');
@@ -32,6 +36,7 @@ function addPlayerToForm(event) {
 }
 
 function createFormLine() {
+    // create a line of the form, one line for each new player
     numPlayers++;
 
     const nameLabel = document.createElement('label');
