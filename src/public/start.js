@@ -22,7 +22,7 @@ function main() {
 
 function addPlayerToForm(event) {
     console.log(numPlayers);
-    if (numPlayers > 10) {
+    if (numPlayers > 9) {
         numPlayers = 10;
         const warningText = document.querySelector('#warningText');
         warningText.textContent = "TOO MANY PLAYERS";
