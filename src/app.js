@@ -53,6 +53,7 @@ app.post('/game', async(req, res) => {
             res.json({status: 'success', msg: msg});
         } else if (req.body.mode == "receive") {
             res.json({status: 'success', msg: receivedTexts[req.body.phoneNum]});
+            delete receivedTexts[req.body.phoneNum];
         }
     } catch (err) {
         res.json({status: 'error', error: err});
@@ -72,6 +73,7 @@ async function sendSMS(phoneNum, text) {
 app.post('/sms', (req, res) => {
     receivedTexts[req.body.From] = req.body.Body;
     
+    /*
     console.log('Received: ' + req.body.Body + " from " + req.body.From);
 
     const twiml = new MessagingResponse();
@@ -79,6 +81,7 @@ app.post('/sms', (req, res) => {
     twiml.message('Received: ' + req.body.Body + " from " + req.body.From);
   
     res.type('text/xml').send(twiml.toString());
+    */
 });  
 
 // ---------- START APP ----------

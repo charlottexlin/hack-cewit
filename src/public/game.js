@@ -3,6 +3,7 @@ let players = [];
 let availableResources = 0;
 let consumedResources = 0;
 let whoseTurn = 0;
+const delayConst = 1000; //in milliseconds
 
 function main() {
     // create form for the create game page
@@ -104,11 +105,16 @@ function startGame(event) {
             listItem.textContent = playerNames[i];
             survivingList.appendChild(listItem);
         }
-        assignRoles();
+        setTimeout(function() {
+            assignRoles();
+        }, delayConst);
+        whoseTurn = Math.floor(Math.random() * numPlayers);
         while (true) {
             let gameStatus = 0;
             // 0: in progress, 1: native species victory, -1: invasive species victory
-            gameStatus = eatingRound();
+            setTimeout(function() {
+                gameStatus = eatingRound();
+            }, delayConst);
             if (gameStatus == 1) {
                 gameOver("native species");
                 return;
@@ -116,7 +122,9 @@ function startGame(event) {
                 gameOver("invasive species");
                 return;
             }
-            gameStatus = votingRound();
+            setTimeout(function() {
+                gameStatus = votingRound();
+            }, delayConst);
             if (gameStatus == 1) {
                 gameOver("native species");
                 return;
@@ -161,12 +169,12 @@ async function assignRoles() {
     }
 }
 
-function eatingRound() {
+async function eatingRound() {
     availableResources = Math.floor(Math.random() * (2 * numPlayers - Math.ceil(0.5 * numPlayers) + 1) + Math.ceil(0.5 * numPlayers));
     while(true) {
         if (availableResources > 0 || players[whoseTurn].role == "invasive") {
             // Active player consumes
-            newConsumption = contactEater(players[whoseTurn]);
+            let newConsumption = contactEater(players[whoseTurn]);
             availableResources -= newConsumption;
             if (players[whoseTurn].role == "native") {
                 consumedResources += newConsumption;
@@ -178,6 +186,13 @@ function eatingRound() {
         } else {
             // Player dies
             players[whoseTurn].status = "extinct";
+            await fetch('/game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({mode: "send", phoneNum: players[whoseTurn].phoneNum, text: "You find there are no resources left, and you go extinct!"})
+            });
 
             // Update UI
             const survivingList = document.querySelector('#surviving');
@@ -204,7 +219,9 @@ function eatingRound() {
             }
         }
         // Round continues
-        whoseTurn++;
+        setTimeout(function() {
+            whoseTurn++;
+        }, delayConst);
         if(whoseTurn==numPlayers) {
             whoseTurn = 0;
         }
@@ -226,13 +243,15 @@ async function contactEater(player) {
         },
         body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: messageText})
     });
-    const res = await fetch('/game', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
-    });
+    setTimeout(async function() {
+        const res = await fetch('/game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
+        });
+    }, 3*delayConst);
     let chosenAmount = await res.json().msg;
     if (chosenAmount == 1 || chosenAmount == 2 || (player.role == "invasive" && chosenAmount >= 0 && chosenAmount <= availableResources)) {
         return chosenAmount;
@@ -257,13 +276,15 @@ async function votingRound() {
             },
             body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "It's time to vote! Text the name of the player you'd like to vote out."})
         });
-        const res = await fetch('/game', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
-        });
+        setTimeout(async function() {
+            const res = await fetch('/game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
+            });
+        }, 3*delayConst);
         let vote = await res.json().msg;
         let match = 0;
         for (let i = 0; i < numPlayers; i++) {
@@ -304,6 +325,13 @@ async function votingRound() {
     }
     // Someone dies and the game continues
     players[votedOut].status = "extinct";
+    await fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({mode: "send", phoneNum: players[votedOut].phoneNum, text: "You have been voted out and eliminated!"})
+    });
 
     // Update UI
     const survivingList = document.querySelector('#surviving');
