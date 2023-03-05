@@ -70,6 +70,9 @@ let phoneNum = "(no texts yet)";
 app.post('/sms', (req, res) => {
     text = req.body.Body;
     phoneNum = request.body.From;
+    
+    console.log(text);
+    console.log(phoneNum);
 
     const twiml = new MessagingResponse();
   
