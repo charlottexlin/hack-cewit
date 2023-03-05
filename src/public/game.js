@@ -105,6 +105,26 @@ function startGame(event) {
             survivingList.appendChild(listItem);
         }
         assignRoles();
+        while (true) {
+            let gameStatus = 0;
+            // 0: in progress, 1: native species victory, -1: invasive species victory
+            gameStatus = eatingRound();
+            if (gameStatus == 1) {
+                gameOver("native species");
+                return;
+            } else if (gameStatus == -1) {
+                gameOver("invasive species");
+                return;
+            }
+            gameStatus = votingRound();
+            if (gameStatus == 1) {
+                gameOver("native species");
+                return;
+            } else if (gameStatus == -1) {
+                gameOver("invasive species");
+                return;
+            }
+        }
     }
 }
 
@@ -143,7 +163,7 @@ async function assignRoles() {
 function eatingRound() {
     availableResources = Math.floor(Math.random() * (2 * numPlayers - Math.ceil(0.5 * numPlayers) + 1) + Math.ceil(0.5 * numPlayers));
     while(true) {
-        if (availableResources > 0) {
+        if (availableResources > 0 || players[whoseTurn].role == "invasive") {
             // Active player consumes
             newConsumption = contactEater(players[whoseTurn]);
             availableResources -= newConsumption;
@@ -234,7 +254,7 @@ async function votingRound() {
     return 0;
 }
 
-function gameOver() {
+function gameOver(winner) {
     // make the game information invisible
     const gameInfo = document.querySelector('#gameInfo');
     gameInfo.classList.toggle('invisible');
@@ -242,7 +262,6 @@ function gameOver() {
     const gameOver = document.querySelector('#gameOver');
     gameOver.classList.toggle('invisible');
     const winnerText = document.querySelector('#winnerText');
-    const winner = "";
     winnerText.textContent = "The " + winner + " win!";
 }
 
