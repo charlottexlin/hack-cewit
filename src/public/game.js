@@ -1,4 +1,5 @@
 let numPlayers = 0;
+let players = [];
 
 function main() {
     // create form for the create game page
@@ -80,6 +81,9 @@ function startGame(event) {
     // get player info from the start game form
     const playerNames = (Array.from(document.querySelectorAll('.nameInput'))).map(elem => elem.value);
     const playerNumbers = (Array.from(document.querySelectorAll('.phoneInput'))).map(elem => elem.value);
+    for (let i = 0; i < playerNames.length; i++) {
+        players[i] = {name: playerNames[i], phoneNum: playerNumbers[i]};
+    }
     // ensure phone numbers on form input are valid
     if (checkPhoneNumbers(playerNumbers)) {
         // make the start form invisible
@@ -96,6 +100,7 @@ function startGame(event) {
             listItem.textContent = playerNames[i];
             survivingList.appendChild(listItem);
         }
+        assignRoles();
     }
 }
 
@@ -109,6 +114,26 @@ function checkPhoneNumbers(playerNumbers) {
         }
     }
     return true;
+}
+
+async function assignRoles() {
+    // assign one random player the invasive species role, and all other players the native species role
+    players[Math.floor(Math.random() * numPlayers)].role = "invasive";
+    for (let player of players) {
+        if (!player.role) {
+            player.role = "native";
+        }
+    }
+    // send a POST request to the server, to tell it to text all the players with their role assignments
+    for (let player of players) {
+        await fetch('/game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role})
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', main);

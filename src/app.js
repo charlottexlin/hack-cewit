@@ -39,7 +39,17 @@ app.get('/game', (req, res) => {
     res.render('game');
 });
 
-function sendSMS(phoneNum, text) {
+// for gameplay
+app.post('/game', async(req, res) => {
+    try {
+        await sendSMS(req.phoneNum, req.text);
+        res.json({status: 'success'});
+    } catch (err) {
+        res.json({status: 'error'});
+    }
+});
+
+async function sendSMS(phoneNum, text) {
     client.messages.create({
         body: text,
         messagingServiceSid: serviceSid,
