@@ -99,6 +99,7 @@ function startGame(event) {
         const extinctList = document.querySelector('#extinct');
         // all players are surviving, at the beginning
         for (let i = 0; i < numPlayers; i++) {
+            players[i].status = "surviving";
             const listItem = document.createElement("li");
             listItem.textContent = playerNames[i];
             survivingList.appendChild(listItem);
@@ -153,7 +154,22 @@ function eatingRound() {
             }
         } else {
             // Player dies
-            if (survivingList.length < 3) {
+            players[whoseTurn].status = "extinct";
+
+            // Update UI
+            const survivingList = document.querySelector('#surviving');
+            const extinctList = document.querySelector('#extinct');
+            for (let i = 0; i < numPlayers; i++) {
+                const listItem = document.createElement("li");
+                listItem.textContent = playerNames[i];
+                if (players[i].status === "surviving") {
+                    survivingList.appendChild(listItem);
+                } else {
+                    extinctList.appendChild(listItem);
+                }
+            }
+
+            if (players.filter(player => player.status = "surviving").length < 3) {
                 // Invasive species wins
                 return -1;
             } else {
@@ -207,12 +223,24 @@ async function votingRound() {
     } else if (players[votedOut].role = "invasive") {
         // Native species wins
         return 1;
-    } else if (survivingList.length < 4) {
+    } else if (players.filter(player => player.status = "surviving").length < 4) {
         // Invasive species wins
         return -1;
     }
     // The game continues
     return 0;
+}
+
+function gameOver() {
+    // make the game information invisible
+    const gameInfo = document.querySelector('#gameInfo');
+    gameInfo.classList.toggle('invisible');
+    // show the game over screen
+    const gameOver = document.querySelector('#gameOver');
+    gameOver.classList.toggle('invisible');
+    const winnerText = document.querySelector('#winnerText');
+    const winner = "";
+    winnerText.textContent = "The " + winner + " win!";
 }
 
 document.addEventListener('DOMContentLoaded', main);
