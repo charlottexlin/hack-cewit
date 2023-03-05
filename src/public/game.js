@@ -3,7 +3,6 @@ let players = [];
 let availableResources = 0;
 let consumedResources = 0;
 let whoseTurn = 0;
-const delayConst = 1000; //in milliseconds
 
 function main() {
     // create form for the create game page
@@ -85,7 +84,7 @@ function startGame(event) {
     // get player info from the start game form
     const playerNames = (Array.from(document.querySelectorAll('.nameInput'))).map(elem => elem.value);
     const playerNumbers = (Array.from(document.querySelectorAll('.phoneInput'))).map(elem => elem.value);
-    for (let i = 0; i < playerNames.length; i++) {
+    for (let i = 0; i < numPlayers; i++) {
         players[i] = {name: playerNames[i], phoneNum: playerNumbers[i]};
     }
     // ensure phone numbers on form input are valid
@@ -105,16 +104,13 @@ function startGame(event) {
             listItem.textContent = playerNames[i];
             survivingList.appendChild(listItem);
         }
-        setTimeout(function() {
-            assignRoles();
-        }, delayConst);
+        console.log(players);
+        assignRoles();
         whoseTurn = Math.floor(Math.random() * numPlayers);
         while (true) {
             let gameStatus = 0;
             // 0: in progress, 1: native species victory, -1: invasive species victory
-            setTimeout(function() {
-                gameStatus = eatingRound();
-            }, delayConst);
+            gameStatus = eatingRound();
             if (gameStatus == 1) {
                 gameOver("native species");
                 return;
@@ -122,9 +118,7 @@ function startGame(event) {
                 gameOver("invasive species");
                 return;
             }
-            setTimeout(function() {
-                gameStatus = votingRound();
-            }, delayConst);
+            gameStatus = votingRound();
             if (gameStatus == 1) {
                 gameOver("native species");
                 return;
@@ -159,12 +153,12 @@ async function assignRoles() {
     }
     // send a POST request to the server, to tell it to text all the players with their role assignments
     for (let player of players) {
-        const res = await fetch('/game', {
+        await fetch('/game', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
+            body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
         });
     }
 }
@@ -172,56 +166,57 @@ async function assignRoles() {
 async function eatingRound() {
     availableResources = Math.floor(Math.random() * (2 * numPlayers - Math.ceil(0.5 * numPlayers) + 1) + Math.ceil(0.5 * numPlayers));
     while(true) {
-        if (availableResources > 0 || players[whoseTurn].role == "invasive") {
-            // Active player consumes
-            let newConsumption = contactEater(players[whoseTurn]);
-            availableResources -= newConsumption;
-            if (players[whoseTurn].role == "native") {
-                consumedResources += newConsumption;
-                if (consumedResources >= 4 * numPlayers) {
-                    // Native species wins
-                    return 1;
+        console.log(availableResources);
+        if (players[whoseTurn].status == "surviving") {
+            if (availableResources > 0 || players[whoseTurn].role == "invasive") {
+                // Active player consumes
+                let newConsumption = contactEater(players[whoseTurn]);
+                availableResources -= newConsumption;
+                if (players[whoseTurn].role == "native") {
+                    consumedResources += newConsumption;
+                    if (consumedResources >= 4 * numPlayers) {
+                        // Native species wins
+                        return 1;
+                    }
                 }
-            }
-        } else {
-            // Player dies
-            players[whoseTurn].status = "extinct";
-            await fetch('/game', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({mode: "send", phoneNum: players[whoseTurn].phoneNum, text: "You find there are no resources left, and you go extinct!"})
-            });
-
-            // Update UI
-            const survivingList = document.querySelector('#surviving');
-            const extinctList = document.querySelector('#extinct');
-            survivingList.replaceChildren(); // clear out the existing lists
-            extinctList.replaceChildren();
-            // repopulate the lists
-            for (let i = 0; i < numPlayers; i++) {
-                const listItem = document.createElement("li");
-                listItem.textContent = playerNames[i];
-                if (players[i].status === "surviving") {
-                    survivingList.appendChild(listItem);
-                } else {
-                    extinctList.appendChild(listItem);
-                }
-            }
-
-            if (players.filter(player => player.status = "surviving").length < 3) {
-                // Invasive species wins
-                return -1;
             } else {
-                // Round ends without a winner
-                return 0;
+                // Player dies
+                players[whoseTurn].status = "extinct";
+                await fetch('/game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({mode: "send", phoneNum: players[whoseTurn].phoneNum, text: players[whoseTurn].name + ": You find there are no resources left, and you go extinct!"})
+                });
+
+                // Update UI
+                const survivingList = document.querySelector('#surviving');
+                const extinctList = document.querySelector('#extinct');
+                survivingList.replaceChildren(); // clear out the existing lists
+                extinctList.replaceChildren();
+                // repopulate the lists
+                for (let i = 0; i < numPlayers; i++) {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = playerNames[i];
+                    if (players[i].status === "surviving") {
+                        survivingList.appendChild(listItem);
+                    } else {
+                        extinctList.appendChild(listItem);
+                    }
+                }
+
+                if (players.filter(player => player.status = "surviving").length < 3) {
+                    // Invasive species wins
+                    return -1;
+                } else {
+                    // Round ends without a winner
+                    return 0;
+                }
             }
         }
         // Round continues
-        setTimeout(function() {
-            whoseTurn++;
-        }, delayConst);
+        whoseTurn++;
         if(whoseTurn==numPlayers) {
             whoseTurn = 0;
         }
@@ -229,7 +224,7 @@ async function eatingRound() {
 }
 
 async function contactEater(player) {
-    let messageText = "It's time to take resources! There are currently " + availableResources + " resources available. You can take";
+    let messageText = player.name + ": It's time to take resources! There are currently " + availableResources + " resources available. You can take";
     if (player.role == "invasive") {
         messageText += " between 0 and " + availableResources;
     } else {
@@ -243,15 +238,13 @@ async function contactEater(player) {
         },
         body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: messageText})
     });
-    setTimeout(async function() {
-        const res = await fetch('/game', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
-        });
-    }, 3*delayConst);
+    const res = await fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
+    });
     let chosenAmount = await res.json().msg;
     if (chosenAmount == 1 || chosenAmount == 2 || (player.role == "invasive" && chosenAmount >= 0 && chosenAmount <= availableResources)) {
         return chosenAmount;
@@ -261,22 +254,26 @@ async function contactEater(player) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "Not a valid response, defaulting to 1."})
+        body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": Not a valid response, defaulting to lowest amount possible."})
     });
-    return 1;
+    if (player.role == "invasive") {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 async function votingRound() {
     let votesPerPlayer = new Array(numPlayers).fill(0);
     for (let player of players) {
-        await fetch('/game', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "It's time to vote! Text the name of the player you'd like to vote out."})
-        });
-        setTimeout(async function() {
+        if (player.status == "surviving") {
+            await fetch('/game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": It's time to vote! Text the name of the player you'd like to vote out."})
+            });
             const res = await fetch('/game', {
                 method: 'POST',
                 headers: {
@@ -284,23 +281,23 @@ async function votingRound() {
                 },
                 body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
             });
-        }, 3*delayConst);
-        let vote = await res.json().msg;
-        let match = 0;
-        for (let i = 0; i < numPlayers; i++) {
-            if (players[i].name == vote) {
-                votesPerPlayer[i] += 1;
-                match = 1;
+            let vote = await res.json().msg;
+            let match = 0;
+            for (let i = 0; i < numPlayers; i++) {
+                if (players[i].name == vote) {
+                    votesPerPlayer[i] += 1;
+                    match = 1;
+                }
             }
-        }
-        if (match == 0) {
-            await fetch('/game', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "Not a valid response, vote skipped."})
-            });
+            if (match == 0) {
+                await fetch('/game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": Not a valid response, vote skipped."})
+                });
+            }
         }
     }
     let votedOut = -1;
@@ -330,7 +327,7 @@ async function votingRound() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({mode: "send", phoneNum: players[votedOut].phoneNum, text: "You have been voted out and eliminated!"})
+        body: JSON.stringify({mode: "send", phoneNum: players[votedOut].phoneNum, text: players[votedOut].name + ": You have been voted out and eliminated!"})
     });
 
     // Update UI
