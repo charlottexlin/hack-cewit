@@ -63,7 +63,7 @@ function createFormLine() {
     phoneLabel.textContent = "Phone number";
 
     const phoneInput = document.createElement("input");
-    phoneInput.setAttribute("type", "tel");
+    phoneInput.setAttribute("type", "text");
     phoneInput.setAttribute("name", "phone-number");
     phoneInput.setAttribute("placeholder", "123-456-7890");
     phoneInput.required = true;
@@ -108,9 +108,9 @@ function startGame(event) {
 }
 
 function checkPhoneNumbers(playerNumbers) {
-    const phoneRegex = new RegExp("/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im");
-    for (let n in playerNumbers) {
-        if (phoneRegex.test(n)) {
+    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$/;
+    for (let n of playerNumbers) {
+        if (!(phoneRegex.test(n))) {
             const warningText = document.querySelector('.warningText');
             warningText.textContent = "Invalid phone number!";
             return false;
@@ -129,12 +129,12 @@ async function assignRoles() {
     }
     // send a POST request to the server, to tell it to text all the players with their role assignments
     for (let player of players) {
-        await fetch('/game', {
+        const res = await fetch('/game', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role})
+            body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
         });
     }
 }
