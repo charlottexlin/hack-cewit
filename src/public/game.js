@@ -60,7 +60,7 @@ function createFormLine() {
     phoneLabel.textContent = "Phone number";
 
     const phoneInput = document.createElement("input");
-    phoneInput.setAttribute("type", "tel");
+    phoneInput.setAttribute("type", "text");
     phoneInput.setAttribute("name", "phone-number");
     phoneInput.setAttribute("placeholder", "123-456-7890");
     phoneInput.required = true;
@@ -81,6 +81,8 @@ function startGame(event) {
     // get player info from the start game form
     const playerNames = (Array.from(document.querySelectorAll('.nameInput'))).map(elem => elem.value);
     const playerNumbers = (Array.from(document.querySelectorAll('.phoneInput'))).map(elem => elem.value);
+    console.log(Array.from(document.querySelectorAll('.phoneInput')));
+    console.log("HERE", playerNumbers);
     for (let i = 0; i < playerNames.length; i++) {
         players[i] = {name: playerNames[i], phoneNum: playerNumbers[i]};
     }
@@ -105,9 +107,11 @@ function startGame(event) {
 }
 
 function checkPhoneNumbers(playerNumbers) {
-    const phoneRegex = new RegExp("/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im");
-    for (let n in playerNumbers) {
-        if (!phoneRegex.test(n)) {
+    console.log(playerNumbers);
+    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    for (let n of playerNumbers) {
+        if (!(phoneRegex.test(n))) {
+            console.log(n);
             const warningText = document.querySelector('.warningText');
             warningText.textContent = "Invalid phone number!";
             return false;
