@@ -47,8 +47,12 @@ app.get('/game', (req, res) => {
 // for gameplay
 app.post('/game', async(req, res) => {
     try {
-        const msg = await sendSMS(req.body.phoneNum, req.body.text);
-        res.json({status: 'success', msg: msg});
+        if (req.body.mode == "send") {
+            const msg = await sendSMS(req.body.phoneNum, req.body.text);
+            res.json({status: 'success', msg: msg});
+        } else if (req.body.mode == "receive") {
+            res.json({status: 'success', msg: receivedTexts[req.body.phoneNum]});
+        }
     } catch (err) {
         res.json({status: 'error', error: err});
     }
@@ -64,9 +68,7 @@ async function sendSMS(phoneNum, text) {
     } catch (e) { console.log(e); }
 }
 
-// ---------- START APP ----------
-
-app.post('/sms', (req, res) => {
+app.post('/sms', async(req, res) => {
     receivedTexts[req.body.From] = req.body.Body;
     
     console.log(req.body);
@@ -78,4 +80,5 @@ app.post('/sms', (req, res) => {
     res.type('text/xml').send(twiml.toString());
 });
 
+// ---------- START APP ----------
 app.listen(process.env.PORT || 3000);

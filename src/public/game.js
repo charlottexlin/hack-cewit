@@ -155,7 +155,7 @@ async function assignRoles() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
+            body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
         });
     }
 }
@@ -221,25 +221,50 @@ async function contactEater(player) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({phoneNum: player.phoneNum, text: messageText})
+        body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: messageText})
     });
-    let chosenAmount = 1
-    // Get the player's reply and use it.
-    return chosenAmount;
+    await fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
+    });
+    let chosenAmount = await res.json().msg;
+    if (chosenAmount == 1 || chosenAmount == 2 || (player.role == "invasive" && chosenAmount >= 0 && chosenAmount <= availableResources)) {
+        return chosenAmount;
+    }
+    await fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "Not a valid response, defaulting to 1."})
+    });
+    return 1;
 }
 
 async function votingRound() {
+    let voteArr = [];
     for (let player of players) {
         await fetch('/game', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({phoneNum: player.phoneNum, text: "It's time to vote! Text the name of the player you'd like to vote out."})
+            body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "It's time to vote! Text the name of the player you'd like to vote out."})
         });
+        await fetch('/game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
+        });
+        voteArr.push(await res.json().msg);
     }
-    let votedOut = -1;
     // Then gather all the votes and eliminate a player
+    let votedOut = -1;
     if (votedOut < 0) {
         // The game continues
         return 0;
