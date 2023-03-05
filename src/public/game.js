@@ -159,6 +159,9 @@ function eatingRound() {
             // Update UI
             const survivingList = document.querySelector('#surviving');
             const extinctList = document.querySelector('#extinct');
+            survivingList.textContent = ""; // clear out the existing lists
+            extinctList.textContent = "";
+            // repopulate the lists
             for (let i = 0; i < numPlayers; i++) {
                 const listItem = document.createElement("li");
                 listItem.textContent = playerNames[i];
