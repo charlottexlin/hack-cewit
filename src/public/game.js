@@ -136,7 +136,7 @@ async function assignRoles() {
             },
             body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role})
         });
-        console.log(status);
+        console.log(status.msg);
     }
 }
 
