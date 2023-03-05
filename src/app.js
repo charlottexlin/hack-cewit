@@ -43,19 +43,21 @@ app.get('/game', (req, res) => {
 // for gameplay
 app.post('/game', async(req, res) => {
     try {
-        const msg = await sendSMS(req.phoneNum, req.text);
+        const msg = await sendSMS(req.body.phoneNum, req.body.text);
         res.json({status: 'success', msg: msg});
     } catch (err) {
-        res.json({status: 'error'});
+        res.json({status: 'error', error: err});
     }
 });
 
 async function sendSMS(phoneNum, text) {
-    client.messages.create({
-        body: text,
-        messagingServiceSid: serviceSid,
-        to: phoneNum
-    }).then(message => console.log(message.sid));
+    try {
+        client.messages.create({
+            body: text,
+            messagingServiceSid: serviceSid,
+            to: phoneNum
+        }).then(message => console.log(message.sid));
+    } catch (e) { console.log(e); }
 }
 
 function awaitSMS() {

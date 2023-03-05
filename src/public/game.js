@@ -81,7 +81,6 @@ function startGame(event) {
     // get player info from the start game form
     const playerNames = (Array.from(document.querySelectorAll('.nameInput'))).map(elem => elem.value);
     const playerNumbers = (Array.from(document.querySelectorAll('.phoneInput'))).map(elem => elem.value);
-    console.log(Array.from(document.querySelectorAll('.phoneInput')));
     for (let i = 0; i < playerNames.length; i++) {
         players[i] = {name: playerNames[i], phoneNum: playerNumbers[i]};
     }
@@ -106,11 +105,9 @@ function startGame(event) {
 }
 
 function checkPhoneNumbers(playerNumbers) {
-    console.log(playerNumbers);
     const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
     for (let n of playerNumbers) {
         if (!(phoneRegex.test(n))) {
-            console.log(n);
             const warningText = document.querySelector('.warningText');
             warningText.textContent = "Invalid phone number!";
             return false;
@@ -134,10 +131,8 @@ async function assignRoles() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role})
+            body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
         });
-        const data = await res.json();
-        console.log(data);
     }
 }
 
