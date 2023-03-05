@@ -7,6 +7,8 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceSid = process.env.TWILIO_SERVICE_SID;
 const client = require('twilio')(accountSid, authToken);
 const { MessagingResponse } = require('twilio').twiml;
+const bodyParser = require('body-parser');
+const { Console } = require('console');
 
 // ---------- SETUP ----------
 const ___dirname = path.dirname(url.fileURLToPath(url.pathToFileURL(__filename).toString()));
@@ -20,6 +22,7 @@ app.set("view engine", "hbs");
 // body parsing middleware
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
+//app.use(bodyParser.urlencoded({ extended: false }));
 
 // static file-serving middleware
 app.use(express.static(path.join(___dirname, 'public')));
@@ -60,19 +63,19 @@ async function sendSMS(phoneNum, text) {
     } catch (e) { console.log(e); }
 }
 
-function awaitSMS() {
-    app.post('/sms', (req, res) => {
-        const twiml = new MessagingResponse();
-      
-        twiml.message('Received!');
-      
-        res.type('text/xml').send(twiml.toString());
-    });
-      
-    app.listen(3000, () => {
-        console.log('Express server listening on port 3000');
-    });
-}
-
 // ---------- START APP ----------
+let text = "(no response)";
+let phoneNum = "(no texts yet)";
+
+app.post('/sms', (req, res) => {
+    text = req.body.Body;
+    phoneNum = request.body.From;
+
+    const twiml = new MessagingResponse();
+  
+    twiml.message('Received: ' + text + ' ' + phoneNum);
+  
+    res.type('text/xml').send(twiml.toString());
+});
+
 app.listen(process.env.PORT || 3000);

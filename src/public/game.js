@@ -149,18 +149,16 @@ function eatingRound() {
             consumedResources += newConsumption;
             if (consumedResources >= 4 * numPlayers) {
                 // Native species wins
-                console.log("Game Over!");
-                return;
+                return 1;
             }
         } else {
             // Player dies
             if (survivingList.length < 3) {
                 // Invasive species wins
-                console.log("Game Over!");
-                return;
+                return -1;
             } else {
                 // Round ends without a winner
-                return;
+                return 0;
             }
         }
         // Round continues
@@ -186,7 +184,9 @@ async function contactEater(player) {
         },
         body: JSON.stringify({phoneNum: player.phoneNum, text: messageText})
     });
-    return 1;
+    let chosenAmount = 1
+    // Get the player's reply and use it.
+    return chosenAmount;
 }
 
 async function votingRound() {
@@ -199,7 +199,20 @@ async function votingRound() {
             body: JSON.stringify({phoneNum: player.phoneNum, text: "It's time to vote! Text the name of the player you'd like to vote out."})
         });
     }
+    let votedOut = -1;
     // Then gather all the votes and eliminate a player
+    if (votedOut < 0) {
+        // The game continues
+        return 0;
+    } else if (players[votedOut].role = "invasive") {
+        // Native species wins
+        return 1;
+    } else if (survivingList.length < 4) {
+        // Invasive species wins
+        return -1;
+    }
+    // The game continues
+    return 0;
 }
 
 document.addEventListener('DOMContentLoaded', main);
