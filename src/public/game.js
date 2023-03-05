@@ -107,7 +107,7 @@ function startGame(event) {
 function checkPhoneNumbers(playerNumbers) {
     const phoneRegex = new RegExp("/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im");
     for (let n in playerNumbers) {
-        if (phoneRegex.test(n)) {
+        if (!phoneRegex.test(n)) {
             const warningText = document.querySelector('.warningText');
             warningText.textContent = "Invalid phone number!";
             return false;
