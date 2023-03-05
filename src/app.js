@@ -1,17 +1,15 @@
-import express from "express";
-import url from "url";
-import path from "path";
-import dotenv from "dotenv";
-dotenv.config();
+const express = require('express');
+const url = require('url');
+const path = require('path');
+require('dotenv').config();
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceSid = process.env.TWILIO_SERVICE_SID;
 const client = require('twilio')(accountSid, authToken);
-const express = require('express');
 const { MessagingResponse } = require('twilio').twiml;
 
 // ---------- SETUP ----------
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+const ___dirname = path.dirname(url.fileURLToPath(url.pathToFileURL(__filename).toString()));
 
 // initialize express app
 const app = express();
@@ -23,7 +21,7 @@ app.set("view engine", "hbs");
 app.use(express.urlencoded({extended: false}));
 
 // static file-serving middleware
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(___dirname, 'public')));
 
 // ---------- ROUTING ----------
 // home page
@@ -40,9 +38,6 @@ app.get('/instructions', (req, res) => {
 app.get('/game', (req, res) => {
     res.render('game');
 });
-
-// ---------- START APP ----------
-app.listen(process.env.PORT || 3000);
 
 function sendSMS(phoneNum, text) {
     client.messages.create({
@@ -65,3 +60,6 @@ function awaitSMS() {
         console.log('Express server listening on port 3000');
     });
 }
+
+// ---------- START APP ----------
+app.listen(process.env.PORT || 3000);
