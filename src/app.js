@@ -69,25 +69,14 @@ async function sendSMS(phoneNum, text) {
     } catch (e) { console.log(e); }
 }
 
-/*
-app.post('/sms', async(req, res) => {
+app.post('/sms', (req, res) => {
     receivedTexts[req.body.From] = req.body.Body;
     
-    console.log(req.body);
+    console.log('Received: ' + req.body.Body + " from " + req.body.From);
 
     const twiml = new MessagingResponse();
   
-    twiml.message('Received: ' + req.body);
-  
-    res.type('text/xml').send(twiml.toString());
-});
-*/
-
-app.post('/sms', (req, res) => {
-    const twiml = new MessagingResponse();
-  
-    console.log("This should appear when a text is received!")
-    twiml.message(req.body);
+    twiml.message('Received: ' + req.body.Body + " from " + req.body.From);
   
     res.type('text/xml').send(twiml.toString());
 });  
