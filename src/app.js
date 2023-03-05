@@ -19,6 +19,7 @@ app.set("view engine", "hbs");
 
 // body parsing middleware
 app.use(express.urlencoded({extended: false}));
+app.use(express.json());
 
 // static file-serving middleware
 app.use(express.static(path.join(___dirname, 'public')));
