@@ -223,7 +223,7 @@ async function contactEater(player) {
         },
         body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: messageText})
     });
-    await fetch('/game', {
+    const res = await fetch('/game', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -254,7 +254,7 @@ async function votingRound() {
             },
             body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "It's time to vote! Text the name of the player you'd like to vote out."})
         });
-        await fetch('/game', {
+        const res = await fetch('/game', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -263,10 +263,26 @@ async function votingRound() {
         });
         voteArr.push(await res.json().msg);
     }
-    // Then gather all the votes and eliminate a player
+    votesPerPlayer = new Array(numPlayers).fill(0);
+    for (let vote of voteArr) {
+        for (let i = 0; i < numPlayers; i++) {
+            if (players[i].name == vote) {
+                votesPerPlayer[i] += 1;
+            }
+        }
+    }
     let votedOut = -1;
+    let maxFound = 0;
+    for (let i = 0; i < numPlayers; i++) {
+        if (votesPerPlayer[i] > maxFound) {
+            maxFound = votesPerPlayer[i];
+            votedOut = i;
+        } else if (votesPerPlayer[i] == maxFound) {
+            votedOut = -1;
+        }
+    }
     if (votedOut < 0) {
-        // The game continues
+        // No one dies and the game continues
         return 0;
     } else if (players[votedOut].role = "invasive") {
         // Native species wins
@@ -275,7 +291,24 @@ async function votingRound() {
         // Invasive species wins
         return -1;
     }
-    // The game continues
+    // Someone dies and the game continues
+    players[votedOut].status = "extinct";
+
+    // Update UI
+    const survivingList = document.querySelector('#surviving');
+    const extinctList = document.querySelector('#extinct');
+    survivingList.replaceChildren(); // clear out the existing lists
+    extinctList.replaceChildren();
+    // repopulate the lists
+    for (let i = 0; i < numPlayers; i++) {
+        const listItem = document.createElement("li");
+        listItem.textContent = playerNames[i];
+        if (players[i].status === "surviving") {
+            survivingList.appendChild(listItem);
+        } else {
+            extinctList.appendChild(listItem);
+        }
+    }
     return 0;
 }
 

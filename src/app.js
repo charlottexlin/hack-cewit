@@ -24,6 +24,7 @@ app.set("view engine", "hbs");
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // static file-serving middleware
 app.use(express.static(path.join(___dirname, 'public')));
@@ -85,7 +86,8 @@ app.post('/sms', async(req, res) => {
 app.post('/sms', (req, res) => {
     const twiml = new MessagingResponse();
   
-    twiml.message('The Robots are coming! Head for the hills!');
+    console.log("This should appear when a text is received!")
+    twiml.message(req.body);
   
     res.type('text/xml').send(twiml.toString());
 });  
