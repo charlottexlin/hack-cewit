@@ -82,12 +82,11 @@ function startGame(event) {
     const playerNames = (Array.from(document.querySelectorAll('.nameInput'))).map(elem => elem.value);
     const playerNumbers = (Array.from(document.querySelectorAll('.phoneInput'))).map(elem => elem.value);
     console.log(Array.from(document.querySelectorAll('.phoneInput')));
-    console.log("HERE", playerNumbers);
     for (let i = 0; i < playerNames.length; i++) {
         players[i] = {name: playerNames[i], phoneNum: playerNumbers[i]};
     }
     // ensure phone numbers on form input are valid
-    if (checkPhoneNumbers(playerNumbers)) {
+    // TODO if (checkPhoneNumbers(playerNumbers)) {
         // make the start form invisible
         const startForm = document.querySelector('#startForm');
         startForm.classList.toggle('invisible');
@@ -103,7 +102,7 @@ function startGame(event) {
             survivingList.appendChild(listItem);
         }
         assignRoles();
-    }
+    // TODO }
 }
 
 function checkPhoneNumbers(playerNumbers) {
