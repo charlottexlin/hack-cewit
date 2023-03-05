@@ -65,7 +65,7 @@ function createFormLine() {
     const phoneInput = document.createElement("input");
     phoneInput.setAttribute("type", "text");
     phoneInput.setAttribute("name", "phone-number");
-    phoneInput.setAttribute("placeholder", "123-456-7890");
+    phoneInput.setAttribute("placeholder", "+11234567890");
     phoneInput.required = true;
     phoneInput.classList.add("formInput", "phoneInput");
 
@@ -129,7 +129,8 @@ function startGame(event) {
 }
 
 function checkPhoneNumbers(playerNumbers) {
-    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$/;
+    //const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\\s\\.]?[0-9]{3}[-\\s\\.]?[0-9]{4,6}$/;
+    const phoneRegex = /^\+1[0-9]{10}$/;
     for (let n of playerNumbers) {
         if (!(phoneRegex.test(n))) {
             const warningText = document.querySelector('.warningText');
@@ -167,10 +168,12 @@ function eatingRound() {
             // Active player consumes
             newConsumption = contactEater(players[whoseTurn]);
             availableResources -= newConsumption;
-            consumedResources += newConsumption;
-            if (consumedResources >= 4 * numPlayers) {
-                // Native species wins
-                return 1;
+            if (players[whoseTurn].role == "native") {
+                consumedResources += newConsumption;
+                if (consumedResources >= 4 * numPlayers) {
+                    // Native species wins
+                    return 1;
+                }
             }
         } else {
             // Player dies
@@ -245,7 +248,7 @@ async function contactEater(player) {
 }
 
 async function votingRound() {
-    let voteArr = [];
+    let votesPerPlayer = new Array(numPlayers).fill(0);
     for (let player of players) {
         await fetch('/game', {
             method: 'POST',
@@ -261,14 +264,22 @@ async function votingRound() {
             },
             body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
         });
-        voteArr.push(await res.json().msg);
-    }
-    votesPerPlayer = new Array(numPlayers).fill(0);
-    for (let vote of voteArr) {
+        let vote = await res.json().msg;
+        let match = 0;
         for (let i = 0; i < numPlayers; i++) {
             if (players[i].name == vote) {
                 votesPerPlayer[i] += 1;
+                match = 1;
             }
+        }
+        if (match == 0) {
+            await fetch('/game', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: "Not a valid response, vote skipped."})
+            });
         }
     }
     let votedOut = -1;
