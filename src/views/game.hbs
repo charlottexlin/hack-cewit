@@ -2,9 +2,18 @@
     <h1>Start a game</h1>
     <h2>Enter all players' names and phone numbers</h2>
 
-    <p id="warningText"></p>
+    <p class="warningText"></p>
 
     <button id="addPlayerBtn">Add a player</button>
     <form method="POST" action="/game" id="playersForm"></form>
+</div>
+
+<div id="gameInfo" class="invisible">
+    <div class="listBlock", id="surviving">
+        <h2>Surviving</h2>
+    </div>
+    <div class="listBlock", id="extinct">
+        <h2>Extinct</h2>
+    </div>
 </div>
 <script type="module" src="/game.js"></script>

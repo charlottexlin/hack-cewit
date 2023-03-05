@@ -30,7 +30,7 @@ function addPlayerToForm(event) {
     // maximum number of players is 10
     if (numPlayers > 9) {
         numPlayers = 10;
-        const warningText = document.querySelector('#warningText');
+        const warningText = document.querySelector('.warningText');
         warningText.textContent = "Maximum is ten players!";
     } else {
         createFormLine();
@@ -50,7 +50,8 @@ function createFormLine() {
     nameInput.setAttribute("type", "text");
     nameInput.setAttribute("name", "name");
     nameInput.setAttribute("placeholder", "Player name");
-    nameInput.classList.add("formInput");
+    nameInput.required = true;
+    nameInput.classList.add("formInput", "nameInput");
 
     const phoneLabel = document.createElement('label');
     phoneLabel.setAttribute("for", "phone-number");
@@ -61,7 +62,8 @@ function createFormLine() {
     phoneInput.setAttribute("type", "tel");
     phoneInput.setAttribute("name", "phone-number");
     phoneInput.setAttribute("placeholder", "123-456-7890");
-    phoneInput.classList.add("formInput");
+    phoneInput.required = true;
+    phoneInput.classList.add("formInput", "phoneInput");
 
     const form = document.createElement('div');
     form.appendChild(nameLabel);
@@ -75,9 +77,38 @@ function createFormLine() {
 function startGame(event) {
     // prevent submit button from POSTing
     event.preventDefault();
-    // Make the start form invisible
-    const startForm = document.querySelector('#startForm');
-    startForm.classList.toggle('invisible');
+    // get player info from the start game form
+    const playerNames = (Array.from(document.querySelectorAll('.nameInput'))).map(elem => elem.value);
+    const playerNumbers = (Array.from(document.querySelectorAll('.phoneInput'))).map(elem => elem.value);
+    // ensure phone numbers on form input are valid
+    if (checkPhoneNumbers(playerNumbers)) {
+        // make the start form invisible
+        const startForm = document.querySelector('#startForm');
+        startForm.classList.toggle('invisible');
+        // show the relevant information for this game
+        const gameInfo = document.querySelector('#gameInfo');
+        gameInfo.classList.toggle('invisible');
+        const survivingList = document.querySelector('#surviving');
+        const extinctList = document.querySelector('#extinct');
+        // all players are surviving, at the beginning
+        for (let i = 0; i < numPlayers; i++) {
+            const listItem = document.createElement("li");
+            listItem.textContent = playerNames[i];
+            survivingList.appendChild(listItem);
+        }
+    }
+}
+
+function checkPhoneNumbers(playerNumbers) {
+    const phoneRegex = new RegExp("/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im");
+    for (let n in playerNumbers) {
+        if (phoneRegex.test(n)) {
+            const warningText = document.querySelector('.warningText');
+            warningText.textContent = "Invalid phone number!";
+            return false;
+        }
+    }
+    return true;
 }
 
 document.addEventListener('DOMContentLoaded', main);
