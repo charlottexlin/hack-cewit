@@ -9,6 +9,7 @@ const client = require('twilio')(accountSid, authToken);
 const { MessagingResponse } = require('twilio').twiml;
 const bodyParser = require('body-parser');
 const { Console } = require('console');
+let receivedTexts = {};
 
 // ---------- SETUP ----------
 const ___dirname = path.dirname(url.fileURLToPath(url.pathToFileURL(__filename).toString()));
@@ -22,7 +23,7 @@ app.set("view engine", "hbs");
 // body parsing middleware
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
-//app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // static file-serving middleware
 app.use(express.static(path.join(___dirname, 'public')));
@@ -64,19 +65,16 @@ async function sendSMS(phoneNum, text) {
 }
 
 // ---------- START APP ----------
-let text = "(no response)";
-let phoneNum = "(no texts yet)";
 
 app.post('/sms', (req, res) => {
-    text = req.body.Body;
-    phoneNum = request.body.From;
+    receivedTexts[request.body.From] = req.body.Body;
     
-    console.log(text);
-    console.log(phoneNum);
+    console.log(req.body.Body);
+    console.log(request.body.From);
 
     const twiml = new MessagingResponse();
   
-    twiml.message('Received: ' + text + ' ' + phoneNum);
+    twiml.message('Received: ' + req.body.Body + ' ' + request.body.From);
   
     res.type('text/xml').send(twiml.toString());
 });
