@@ -51,12 +51,11 @@ app.post('/game', async(req, res) => {
 });
 
 async function sendSMS(phoneNum, text) {
-    const message = await client.messages.create({
+    client.messages.create({
         body: text,
         messagingServiceSid: serviceSid,
         to: phoneNum
-    })
-    return message.sid;
+    }).then(message => console.log(message.sid));
 }
 
 function awaitSMS() {
