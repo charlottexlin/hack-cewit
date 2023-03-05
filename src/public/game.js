@@ -126,13 +126,14 @@ async function assignRoles() {
     }
     // send a POST request to the server, to tell it to text all the players with their role assignments
     for (let player of players) {
-        await fetch('/game', {
+        const status = await fetch('/game', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({phoneNum: player.phoneNum, text: "Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role})
         });
+        console.log(status);
     }
 }
 
