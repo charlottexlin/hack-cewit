@@ -1,7 +1,8 @@
 body {
     text-align: center;
     font-family: 'Genos', sans-serif;
-    background-color: lightblue;
+    background-color: green;
+    color: white;
 }
 
 h1 {
@@ -21,11 +22,16 @@ a, button, .submit {
     text-align: center;
     cursor: pointer;
     outline: none;
-    color: white;
-    background-color: green;
+    color: green;
+    background-color: rgb(255, 247, 171);
     border: none;
     border-radius: 15px;
     box-shadow: 0 9px #999;
+    margin: 0.5em;
+}
+
+p {
+    font-size: 1.5em;
 }
 
 a {
@@ -43,11 +49,11 @@ a {
 }
   
 a:hover, button:hover, .submit:hover {
-    background-color: rgb(0, 100, 0);
+    background-color: rgb(238, 226, 117);
 }
   
 a:active, button:active, .submit:active {
-    background-color: rgb(0, 100, 0);
+    background-color: rgb(238, 226, 117);
     box-shadow: 0 5px #666;
     transform: translateY(4px);
 }
@@ -67,19 +73,42 @@ a:active, button:active, .submit:active {
 .warningText {
     font-size: 3em;
     font-family: 'Genos', sans-serif;
-    color: red;
+    color: yellow;
     margin: 0;
 }
 
 .listBlock {
-    display: block;
+    display: inline-block;
     width: 30%;
     margin: 1em;
 }
 
 li {
-    color: green;
-    font-size: 2em;
+    font-size: 3em;
+}
+
+.logo {
+    display: block;
+    width: 60%;
+    height: auto;
+    margin: auto;
+    margin-top: 2em;
+}
+
+.leftGrass {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 25%;
+    height: auto;
+}
+
+.rightGrass {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 25%;
+    height: auto;
 }
 
 .invisible {
