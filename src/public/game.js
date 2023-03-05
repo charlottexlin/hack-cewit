@@ -104,7 +104,6 @@ function startGame(event) {
             listItem.textContent = playerNames[i];
             survivingList.appendChild(listItem);
         }
-        console.log(players);
         assignRoles();
         whoseTurn = Math.floor(Math.random() * numPlayers);
         while (true) {
@@ -143,7 +142,7 @@ function checkPhoneNumbers(playerNumbers) {
     return true;
 }
 
-async function assignRoles() {
+function assignRoles() {
     // assign one random player the invasive species role, and all other players the native species role
     players[Math.floor(Math.random() * numPlayers)].role = "invasive";
     for (let player of players) {
@@ -153,20 +152,13 @@ async function assignRoles() {
     }
     // send a POST request to the server, to tell it to text all the players with their role assignments
     for (let player of players) {
-        await fetch('/game', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species"})
-        });
+        sendToBack(player.phoneNum, player.name + ": Welcome to Invasive Impostor 🐍! Your role this game is:\n" + player.role + " species")
     }
 }
 
-async function eatingRound() {
+function eatingRound() {
     availableResources = Math.floor(Math.random() * (2 * numPlayers - Math.ceil(0.5 * numPlayers) + 1) + Math.ceil(0.5 * numPlayers));
     while(true) {
-        console.log(availableResources);
         if (players[whoseTurn].status == "surviving") {
             if (availableResources > 0 || players[whoseTurn].role == "invasive") {
                 // Active player consumes
@@ -182,13 +174,7 @@ async function eatingRound() {
             } else {
                 // Player dies
                 players[whoseTurn].status = "extinct";
-                await fetch('/game', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({mode: "send", phoneNum: players[whoseTurn].phoneNum, text: players[whoseTurn].name + ": You find there are no resources left, and you go extinct!"})
-                });
+                sendToBack(players[whoseTurn].phoneNum, players[whoseTurn].name + ": You find there are no resources left, and you go extinct!")
 
                 // Update UI
                 const survivingList = document.querySelector('#surviving');
@@ -198,7 +184,7 @@ async function eatingRound() {
                 // repopulate the lists
                 for (let i = 0; i < numPlayers; i++) {
                     const listItem = document.createElement("li");
-                    listItem.textContent = playerNames[i];
+                    listItem.textContent = players[i].name;
                     if (players[i].status === "surviving") {
                         survivingList.appendChild(listItem);
                     } else {
@@ -223,39 +209,22 @@ async function eatingRound() {
     }
 }
 
-async function contactEater(player) {
+function contactEater(player) {
     let messageText = player.name + ": It's time to take resources! There are currently " + availableResources + " resources available. You can take";
     if (player.role == "invasive") {
-        messageText += " between 0 and " + availableResources;
+        messageText += " between 0 and " + availableResources + " resources.";
+    } else if (availableResources > 1) {
+        messageText += " 1 or 2 resources.";
     } else {
-        messageText += " 1 or 2";
+        messageText += " 1 resource.";
     }
-    messageText += " resources. How many resources would you like to take?"
-    await fetch('/game', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: messageText})
-    });
-    const res = await fetch('/game', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
-    });
-    let chosenAmount = await res.json().msg;
+    messageText += " How many resources would you like to take?"
+    sendToBack(player.phoneNum, messageText);
+    let chosenAmount = receiveFromBack(player.phoneNum);
     if (chosenAmount == 1 || chosenAmount == 2 || (player.role == "invasive" && chosenAmount >= 0 && chosenAmount <= availableResources)) {
         return chosenAmount;
     }
-    await fetch('/game', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": Not a valid response, defaulting to lowest amount possible."})
-    });
+    sendToBack(player.phoneNum, player.name + ": Not a valid response, defaulting to lowest amount possible.");
     if (player.role == "invasive") {
         return 0;
     } else {
@@ -263,25 +232,12 @@ async function contactEater(player) {
     }
 }
 
-async function votingRound() {
+function votingRound() {
     let votesPerPlayer = new Array(numPlayers).fill(0);
     for (let player of players) {
         if (player.status == "surviving") {
-            await fetch('/game', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": It's time to vote! Text the name of the player you'd like to vote out."})
-            });
-            const res = await fetch('/game', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({mode: "receive", phoneNum: player.phoneNum})
-            });
-            let vote = await res.json().msg;
+            sendToBack(player.phoneNum, player.name + ": It's time to vote! Text the name of the player you'd like to vote out.")
+            let vote = receiveFromBack(player.phoneNum);
             let match = 0;
             for (let i = 0; i < numPlayers; i++) {
                 if (players[i].name == vote) {
@@ -290,13 +246,7 @@ async function votingRound() {
                 }
             }
             if (match == 0) {
-                await fetch('/game', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({mode: "send", phoneNum: player.phoneNum, text: player.name + ": Not a valid response, vote skipped."})
-                });
+                sendToBack(player.phoneNum, player.name + ": Not a valid response, vote skipped.");
             }
         }
     }
@@ -322,13 +272,7 @@ async function votingRound() {
     }
     // Someone dies and the game continues
     players[votedOut].status = "extinct";
-    await fetch('/game', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({mode: "send", phoneNum: players[votedOut].phoneNum, text: players[votedOut].name + ": You have been voted out and eliminated!"})
-    });
+    sendToBack(players[votedOut].phoneNum, players[votedOut].name + ": You have been voted out and eliminated!");
 
     // Update UI
     const survivingList = document.querySelector('#surviving');
@@ -357,6 +301,27 @@ function gameOver(winner) {
     gameOver.classList.toggle('invisible');
     const winnerText = document.querySelector('#winnerText');
     winnerText.textContent = "The " + winner + " win!";
+}
+
+async function sendToBack(phone, message) {
+    await fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({mode: "send", phoneNum: phone, text: message})
+    });
+}
+
+async function receiveFromBack(phone) {
+    const res = await fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({mode: "receive", phoneNum: phone})
+    });
+    return await res.json().msg;
 }
 
 document.addEventListener('DOMContentLoaded', main);

@@ -73,7 +73,6 @@ async function sendSMS(phoneNum, text) {
 app.post('/sms', (req, res) => {
     receivedTexts[req.body.From] = req.body.Body;
     
-    /*
     console.log('Received: ' + req.body.Body + " from " + req.body.From);
 
     const twiml = new MessagingResponse();
@@ -81,7 +80,6 @@ app.post('/sms', (req, res) => {
     twiml.message('Received: ' + req.body.Body + " from " + req.body.From);
   
     res.type('text/xml').send(twiml.toString());
-    */
 });  
 
 // ---------- START APP ----------
