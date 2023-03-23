@@ -61,6 +61,8 @@ app.post('/game', async(req, res) => {
 });
 
 async function sendSMS(phoneNum, text) {
+    return
+    /*
     try {
         client.messages.create({
             body: text,
@@ -68,6 +70,7 @@ async function sendSMS(phoneNum, text) {
             to: phoneNum
         }).then(message => console.log(message.sid));
     } catch (e) { console.log(e); }
+    */
 }
 
 app.post('/sms', (req, res) => {
